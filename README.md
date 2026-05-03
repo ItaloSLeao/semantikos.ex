@@ -220,3 +220,226 @@ Acesse: http://localhost:4000
 |-------|-------|-------|
 | admin@eventmanager.com | Admin@123 | Admin |
 | professor@universidade.edu.br | Speaker@123 | Palestrante |
+| aluno1@universidade.edu.br | Student@123 | Estudante |
+
+## Configuração
+
+### Variáveis de Ambiente (Produção)
+
+```bash
+# Banco de dados
+export DATABASE_URL="ecto://user:pass@host/db"
+export POOL_SIZE="15"
+
+# Segurança
+export SECRET_KEY_BASE="sua-chave-secreta"
+export PHX_HOST="seusite.com"
+
+# Email
+export SMTP_RELAY="smtp.example.com"
+export SMTP_USERNAME="user"
+export SMTP_PASSWORD="pass"
+```
+
+### Nginx
+
+```bash
+# Copie a configuração
+sudo cp priv/nginx/nginx.conf /etc/nginx/sites-available/event_manager
+sudo ln -s /etc/nginx/sites-available/event_manager /etc/nginx/sites-enabled/
+
+# Configure SSL
+sudo certbot --nginx -d eventmanager.example.com
+
+# Reinicie
+sudo nginx -t && sudo systemctl restart nginx
+```
+
+## Uso
+
+### Comandos Principais
+
+```bash
+# Servidor com reload automático
+mix phx.server
+
+# Servidor interativo (IEx)
+iex -S mix phx.server
+
+# Console do banco
+mix ecto.migrate
+
+# Resetar banco
+mix ecto.reset
+
+# Executar testes
+mix test
+
+# Formatar código
+mix format
+
+# Verificar warnings
+mix compile --warnings-as-errors
+```
+
+### Criando um Evento (Admin)
+
+1. Acesse `/admin/events/new`
+2. Preencha os dados do evento
+3. Selecione o palestrante
+4. Salve como rascunho ou publique
+
+### Inscrevendo-se em Evento
+
+1. Acesse `/events`
+2. Escolha um evento
+3. Clique em "Inscrever-se"
+4. Confirme a inscrição
+
+### Chat ao Vivo
+
+1. Inscreva-se no evento
+2. Acesse `/events/:id/chat`
+3. Envie mensagens ou perguntas em tempo real
+
+## API
+
+### Endpoints REST
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/api/events` | Lista eventos públicos |
+| GET | `/api/events/:id` | Detalhes de um evento |
+| GET | `/api/events/:id/stats` | Estatísticas do evento |
+
+### WebSocket
+
+```javascript
+// Conectar ao canal de chat
+let socket = new Socket("/socket", {params: {token: userToken}})
+socket.connect()
+
+let channel = socket.channel("event_chat:123", {})
+channel.join()
+  .receive("ok", resp => console.log("Joined successfully", resp))
+  .receive("error", resp => console.log("Unable to join", resp))
+
+// Enviar mensagem
+channel.push("new_message", {message: "Olá!", is_question: false})
+
+// Receber mensagens
+channel.on("new_message", payload => {
+  console.log(`${payload.user_name}: ${payload.message}`)
+})
+```
+
+## Testes
+
+```bash
+# Executar todos os testes
+mix test
+
+# Teste específico
+mix test test/event_manager/events_test.exs
+
+# Teste com coverage
+mix test --cover
+
+# Teste em modo watch
+mix test --stale --listen-stdin
+```
+
+### Estrutura de Testes
+
+```
+test/
+├── event_manager/           # Testes de contextos
+│   ├── accounts_test.exs
+│   ├── events_test.exs
+│   └── certificates_test.exs
+├── event_manager_web/       # Testes de controllers
+│   ├── controllers/
+│   └── channels/
+└── support/                 # Factories e helpers
+    ├── factory.ex
+    └── fixtures.ex
+```
+
+## Deploy
+
+### Docker
+
+```dockerfile
+FROM elixir:1.14-alpine
+
+WORKDIR /app
+COPY . .
+
+RUN mix local.hex --force && \
+    mix local.rebar --force && \
+    mix deps.get --only prod && \
+    mix compile
+
+CMD ["mix", "phx.server"]
+```
+
+### Release
+
+```bash
+# Gerar release
+MIX_ENV=prod mix release
+
+# Executar
+_build/prod/rel/event_manager/bin/event_manager start
+```
+
+## Critérios de Avaliação
+
+| Critério | Peso | Implementação |
+|----------|------|---------------|
+| **Features e qualidade do código** | 40% | ✅ Todas as funcionalidades implementadas |
+| **Uso adequado da stack** | 30% | ✅ Elixir/Phoenix + PostgreSQL + Nginx |
+| **Trabalho em equipe** | 20% | 📋 Git flow, divisão de tarefas |
+| **Documentação** | 10% | 📖 README, comentários no código |
+
+### Checklist de Features
+
+- [x] Autenticação com 3 papéis (admin, speaker, student)
+- [x] Autorização RBAC
+- [x] CRUD de eventos com validações
+- [x] Sistema de inscrições com controle de vagas
+- [x] Chat em tempo real (Phoenix Channels)
+- [x] Notificações em tempo real
+- [x] Geração de certificados PDF
+- [x] Verificação de certificados
+- [x] Dashboards com estatísticas
+- [x] Relatórios por curso/departamento
+- [x] Exportação CSV
+- [x] Full-text search (PostgreSQL)
+- [x] Nginx como proxy reverso
+- [x] SSL/HTTPS
+- [x] WebSocket support
+- [x] Rate limiting
+- [x] Testes automatizados
+
+## Contribuição
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+## Licença
+
+MIT License - veja [LICENSE](LICENSE) para detalhes.
+
+## Autores
+
+- **Professor(a)**: Maria Luisa Ghizoni Gonzalez, Roque Mendes Prado Trindade
+- **Disciplina**: Paradigmas de Linguagens de Programação (PLP)
+- **Grupo**: [Adicionar nomes dos integrantes]
+
+---
+
+Desenvolvido com ❤️ e Elixir no curso de Ciência da Computação.
