@@ -125,3 +125,131 @@ defmodule EventManager.Core do
       # Notifica inscritos em tempo real via WebSocket antes de processar lógica pesada
       EventManagerWeb.Endpoint.broadcast(
         "event_notifications:#{cancelled_event.id}",
+        "event_cancelled",
+        %{title: cancelled_event.title, reason: "Evento cancelado pela administração"}
+      )
+      {:ok, :notified}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{event: event}} -> {:ok, event}
+      {:error, _, error, _} -> {:error, error}
+    end
+  end
+
+  def delete_event(%Event{} = event) do
+    if EventManager.Schemas.Event.registration_count(event) > 0, do: {:error, :has_registrations}, else: Repo.delete(event)
+  end
+
+  def register_for_event(event_id, user_id) do
+    event_id = parse_id(event_id)
+    user_id = parse_id(user_id)
+    Repo.reserve_seat(event_id, user_id) |> case do
+      {:ok, %{registration: reg}} ->
+        EventManagerWeb.Endpoint.broadcast("event:#{event_id}", "registration_updated", %{
+          event_id: event_id, remaining_seats: Event.remaining_seats(get_event!(event_id))})
+        {:ok, reg}
+      error -> error
+    end
+  end
+
+  def cancel_registration(event_id, user_id) do
+    event_id = parse_id(event_id)
+    user_id = parse_id(user_id)
+    
+    registration = Repo.get_by(Registration, event_id: event_id, user_id: user_id)
+    
+    if registration do
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:cancel, Registration.cancel_changeset(registration))
+      |> Ecto.Multi.run(:promote, fn repo, _ ->
+        if registration.status == :confirmed do
+          promote_waitlist(repo, event_id)
+        else
+          {:ok, nil}
+        end
+      end)
+      |> Repo.transaction()
+      |> case do
+        {:ok, _} ->
+          EventManagerWeb.Endpoint.broadcast("event:#{event_id}", "registration_updated", %{
+            event_id: event_id, remaining_seats: Event.remaining_seats(get_event!(event_id))})
+          {:ok, :cancelled}
+        error -> error
+      end
+    else
+      {:error, :not_found}
+    end
+  end
+
+  defp promote_waitlist(repo, event_id) do
+    next_in_line =
+      from(r in Registration,
+        where: r.event_id == ^event_id and r.status == :waitlisted,
+        order_by: [asc: r.registered_at],
+        limit: 1
+      )
+      |> repo.one()
+
+    if next_in_line do
+      next_in_line
+      |> Ecto.Changeset.change(status: :confirmed)
+      |> repo.update()
+    else
+      {:ok, nil}
+    end
+  end
+
+  def get_registration(event_id, user_id) do
+    event_id = parse_id(event_id)
+    user_id = parse_id(user_id)
+    Repo.get_by(Registration, event_id: event_id, user_id: user_id)
+  end
+
+  def mark_attendance(reg_id, attended) do
+    reg_id = parse_id(reg_id)
+    Repo.get!(Registration, reg_id) |> Registration.attendance_changeset(%{attended: attended}) |> Repo.update()
+  end
+
+  def list_user_registrations(user_id) do
+    user_id = parse_id(user_id)
+    from(r in Registration, where: r.user_id == ^user_id and r.status != :cancelled, preload: [event: [:speaker]], order_by: [desc: r.registered_at]) |> Repo.all()
+  end
+
+  def list_event_registrations(event_id) do
+    event_id = parse_id(event_id)
+    from(r in Registration, where: r.event_id == ^event_id and r.status != :cancelled, preload: [:user], order_by: [asc: r.registered_at]) |> Repo.all()
+  end
+
+  def get_event_stats(event_id) do
+    event_id = parse_id(event_id)
+    event = get_event!(event_id)
+    regs = from(r in Registration, where: r.event_id == ^event_id and r.status == :confirmed) |> Repo.aggregate(:count, :id)
+    waitlisted = from(r in Registration, where: r.event_id == ^event_id and r.status == :waitlisted) |> Repo.aggregate(:count, :id)
+    attended = from(r in Registration, where: r.event_id == ^event_id and r.attended == true) |> Repo.aggregate(:count, :id)
+    
+    occupancy = if event.max_seats > 0, do: Float.round(regs / event.max_seats * 100, 2), else: 0.0
+
+    %{event: event, total_registrations: regs, waitlisted: waitlisted, total_attended: attended,
+      remaining_seats: max(0, event.max_seats - regs), occupancy_rate: occupancy}
+  end
+
+  def search_events(term) when is_binary(term), do: Repo.search_events(term) |> Repo.all() |> Repo.preload([:speaker])
+  def search_events(_), do: {:error, :invalid_query}
+
+  defp filter_status(q, nil), do: q
+  defp filter_status(q, status), do: where(q, [e], e.status == ^status)
+  defp filter_speaker(q, nil), do: q
+  defp filter_speaker(q, id), do: where(q, [e], e.speaker_id == ^id)
+  defp filter_upcoming(q, true), do: where(q, [e], e.date > ^DateTime.utc_now())
+  defp filter_upcoming(q, _), do: q
+  defp order_events(q, {:date, :asc}), do: order_by(q, [e], asc: e.date)
+  defp order_events(q, {:date, :desc}), do: order_by(q, [e], desc: e.date)
+  defp order_events(q, {:title, :asc}), do: order_by(q, [e], asc: e.title)
+  defp order_events(q, _), do: order_by(q, [e], asc: e.date)
+  defp paginate(q, nil, _), do: q
+  defp paginate(q, page, per_page) do
+    offset = (max(page, 1) - 1) * per_page
+    q |> limit(^per_page) |> offset(^offset)
+  end
+end
