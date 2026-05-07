@@ -120,3 +120,125 @@ defmodule EventManagerWeb.CoreComponents do
   defp badge_style(:default), do: "display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:600;letter-spacing:0.04em;background:#f3f2ee;color:#6b7280;border:1px solid #e0ddd8;"
   defp badge_style(:success),  do: "display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:600;letter-spacing:0.04em;background:rgba(22,163,74,0.1);color:#15803d;border:1px solid rgba(22,163,74,0.2);"
   defp badge_style(:warning),  do: "display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:600;letter-spacing:0.04em;background:rgba(212,165,71,0.12);color:#92400e;border:1px solid rgba(212,165,71,0.3);"
+  defp badge_style(:danger),   do: "display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:600;letter-spacing:0.04em;background:rgba(220,38,38,0.08);color:#b91c1c;border:1px solid rgba(220,38,38,0.15);"
+  defp badge_style(:info),     do: "display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:600;letter-spacing:0.04em;background:rgba(59,130,246,0.08);color:#1d4ed8;border:1px solid rgba(59,130,246,0.15);"
+
+  # ── Input ──────────────────────────────────────────────────────────────────
+
+  @doc "Renders a labeled input field."
+  attr :name, :string, required: true
+  attr :label, :string, default: nil
+  attr :type, :string, default: "text"
+  attr :value, :any, default: nil
+  attr :errors, :list, default: []
+  attr :required, :boolean, default: false
+  attr :rest, :global
+
+  def input(assigns) do
+    ~H"""
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <%= if @label do %>
+        <label for={@name} style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:0.95rem; font-weight:500; color:var(--text-primary); letter-spacing:0.01em;">
+          <%= @label %>
+          <%= if @required do %>
+            <span style="color:var(--danger); margin-left:2px;">*</span>
+          <% end %>
+        </label>
+      <% end %>
+      <input
+        type={@type}
+        name={@name}
+        id={@name}
+        value={@value}
+        required={@required}
+        class="input-field"
+        {@rest}
+      />
+      <%= if @errors != [] do %>
+        <div style="font-size:0.8rem; color:var(--danger);">
+          <%= for error <- @errors do %>
+            <p style="margin:0;"><%= error %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
+  # ── Event status badge ──────────────────────────────────────────────────────
+
+  @doc "Renders a badge for event status."
+  attr :status, :atom, required: true
+
+  def event_status_badge(%{status: :draft} = assigns) do
+    ~H"""
+      <.badge text="Rascunho" variant={:default} />
+      """
+  end
+
+  def event_status_badge(%{status: :published} = assigns) do
+    ~H"""
+      <.badge text="Publicado" variant={:info} />
+      """
+  end
+
+  def event_status_badge(%{status: :ongoing} = assigns) do
+    ~H"""
+      <.badge text="Em andamento" variant={:success} />
+      """
+  end
+
+  def event_status_badge(%{status: :completed} = assigns) do
+    ~H"""
+      <.badge text="Concluído" variant={:default} />
+      """
+  end
+
+  def event_status_badge(%{status: :cancelled} = assigns) do
+    ~H"""
+      <.badge text="Cancelado" variant={:danger} />
+      """
+  end
+
+  # ── Role badge ─────────────────────────────────────────────────────────────
+
+  @doc "Renders a badge for user role."
+  attr :role, :atom, required: true
+
+  def role_badge(%{role: :admin} = assigns) do
+    ~H"""
+      <.badge text="Admin" variant={:danger} />
+      """
+  end
+
+  def role_badge(%{role: :speaker} = assigns) do
+    ~H"""
+      <.badge text="Palestrante" variant={:warning} />
+      """
+  end
+
+  def role_badge(%{role: :student} = assigns) do
+    ~H"""
+      <.badge text="Estudante" variant={:default} />
+      """
+  end
+
+  # ── Formatted datetime ─────────────────────────────────────────────────────
+
+  @doc "Renders a formatted datetime element."
+  attr :datetime, :any, required: true
+  attr :format, :atom, values: [:short, :long, :date_only], default: :short
+
+  def formatted_datetime(assigns) do
+    ~H"""
+    <time datetime={format_iso(@datetime)}>
+      <%= format_datetime(@datetime, @format) %>
+    </time>
+    """
+  end
+
+  defp format_datetime(datetime, :short),     do: Calendar.strftime(datetime, "%d/%m/%Y %H:%M")
+  defp format_datetime(datetime, :long),      do: Calendar.strftime(datetime, "%A, %d de %B de %Y às %H:%M")
+  defp format_datetime(datetime, :date_only), do: Calendar.strftime(datetime, "%d/%m/%Y")
+  defp format_iso(datetime),                  do: Calendar.strftime(datetime, "%Y-%m-%dT%H:%M:%S")
+end
