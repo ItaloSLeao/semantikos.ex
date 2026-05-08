@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <meta name="description" content="Sistema de Gerenciamento de Eventos Acadêmicos" />
+
+    <title>Semanthikos — <%= assigns[:page_title] || "Eventos" %></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
+
+    <script>
+      // Initialize theme before rendering to avoid flash
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
+    <style>
+      :root {
+        /* Light Theme (High Contrast: Silver/Gray background, Ink accents) */
+        --bg-body: #f0f2f5;          /* Silver/gray background */
+        --bg-surface: #ffffff;       /* Pure white cards */
+        --bg-surface-hover: #e2e8f0; /* Darker hover for contrast */
+        
+        --text-primary: #0d0f1a;     /* Ink text */
+        --text-secondary: #334155;   /* Darker slate for secondary text */
+        --text-muted: #64748b;       /* Muted gray */
+        
+        --border-color: #cbd5e1;     /* Stronger border for contrast */
+        
+        --primary: #d4a547;          /* Gold */
+        --primary-hover: #c8b87a;
+        --primary-glow: rgba(212, 165, 71, 0.2);
+        
+        --success: #10b981;          /* Emerald */
+        --danger: #ef4444;           /* Red */
+        --warning: #f59e0b;          /* Amber */
+        
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(13, 15, 26, 0.1);
+      }
+
+      html.dark {
+        /* Dark Theme (Ink background, Paper text) */
+        --bg-body: #0d0f1a;          /* Original --ink */
+        --bg-surface: #1e2130;       /* Original --ink-soft */
+        --bg-surface-hover: #2d3146; /* Original --ink-muted */
+        
+        --text-primary: #faf9f6;     /* Original --paper */
+        --text-secondary: #f5f4f0;   /* Original --smoke */
+        --text-muted: #6b7280;       /* Original --slate */
+        
+        --border-color: rgba(255,255,255,0.07); /* Original --border */
+        
+        --primary: #d4a547;          /* Original --gold */
+        --primary-hover: #f0d898;    /* Original --gold-pale */
+        --primary-glow: rgba(212, 165, 71, 0.15);
+        
+        --glass-bg: rgba(13, 15, 26, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.05);
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        min-height: 100vh;
+        margin: 0;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      h1, h2, h3, .serif { font-family: 'DM Serif Display', serif; }
+      
+      ::selection { background: var(--primary); color: #fff; }
+
+      /* Utility Classes */
+      .surface {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+      }
+      
+      .glass {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
