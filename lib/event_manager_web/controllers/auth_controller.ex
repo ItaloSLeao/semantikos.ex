@@ -83,3 +83,88 @@ defmodule EventManagerWeb.AuthController do
       conn
       |> put_flash(:error, "Link de redefinição de senha inválido ou expirado.")
       |> redirect(to: ~p"/")
+    end
+  end
+
+  def update_reset_password(conn, %{"token" => token, "user" => user_params}) do
+    user = EventManager.Core.get_user_by_reset_password_token(token)
+
+    if user do
+      case EventManager.Core.reset_user_password(user, user_params) do
+        {:ok, _} ->
+          conn
+          |> put_flash(:info, "Senha redefinida com sucesso. Faça login.")
+          |> redirect(to: ~p"/users/log_in")
+
+        {:error, _} ->
+          render(conn, "reset_password_edit.html", token: token)
+      end
+    else
+      conn
+      |> put_flash(:error, "Link de redefinição de senha inválido ou expirado.")
+      |> redirect(to: ~p"/")
+    end
+  end
+
+  # --- User Settings ---
+  def edit_settings(conn, _params) do
+    user = conn.assigns.current_user
+    render(conn, "settings_edit.html", user: user)
+  end
+
+  def update_settings(conn, %{"user" => user_params} = params) do
+    user = conn.assigns.current_user
+
+    user_params = if upload = params["avatar"] do
+      upload_path = Path.join(:code.priv_dir(:event_manager), "static/uploads")
+      File.mkdir_p!(upload_path)
+
+      filename = "#{user.id}-#{System.unique_integer([:positive])}#{Path.extname(upload.filename)}"
+      dest = Path.join(upload_path, filename)
+      File.cp!(upload.path, dest)
+      Map.put(user_params, "avatar_path", "/uploads/#{filename}")
+    else
+      user_params
+    end
+
+    case EventManager.Core.update_user_profile(user, user_params) do
+      {:ok, _user} ->
+        conn
+        |> put_flash(:info, "Perfil atualizado com sucesso.")
+        |> redirect(to: ~p"/users/settings")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "Erro ao atualizar perfil.")
+        |> render("settings_edit.html", user: user)
+    end
+  end
+
+  def update_password(conn, %{"user" => user_params}) do
+    user = conn.assigns.current_user
+
+    case EventManager.Core.update_user_password(user, user_params) do
+      {:ok, _user} ->
+        conn
+        |> put_flash(:info, "Senha atualizada com sucesso.")
+        |> redirect(to: ~p"/users/settings")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "Erro ao atualizar senha. Verifique a senha atual.")
+        |> render("settings_edit.html", user: user)
+    end
+  end
+
+  def confirm_email(conn, %{"token" => token}) do
+    if EventManager.Core.confirm_user(token) do
+      conn
+      |> put_flash(:info, "Email confirmado com sucesso.")
+      |> redirect(to: ~p"/users/settings")
+    else
+      conn
+      |> put_flash(:error, "Link de confirmação inválido ou expirado.")
+      |> redirect(to: ~p"/users/settings")
+    end
+  end
+end
