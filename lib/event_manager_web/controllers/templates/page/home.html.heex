@@ -1,0 +1,73 @@
+<%!-- ─── HERO ───────────────────────────────────────────────── --%>
+<section style="background:var(--bg-body); padding:7rem 2rem 5rem; position:relative; overflow:hidden; border-bottom: 1px solid var(--border-color);">
+  <%!-- Decorative background shapes --%>
+  <div style="position:absolute; inset:0; pointer-events:none; overflow:hidden;">
+    <div style="position:absolute; top:-80px; right:-120px; width:560px; height:560px; border-radius:50%; background:radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);"></div>
+    <div style="position:absolute; bottom:-60px; left:-80px; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);"></div>
+    <%!-- Subtle grid lines --%>
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.04;" xmlns="http://www.w3.org/2000/svg">
+      <defs><pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+        <path d="M 48 0 L 0 0 0 48" fill="none" stroke="currentColor" stroke-width="0.5"/>
+      </pattern></defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+    </svg>
+  </div>
+
+  <div style="max-width:1280px; margin:0 auto; position:relative;">
+    <div style="max-width:680px;" class="anim-fadeup">
+      <div style="display:inline-flex; align-items:center; gap:8px; background:var(--primary-glow); border:1px solid rgba(59, 130, 246, 0.2); border-radius:100px; padding:6px 16px; margin-bottom:2rem;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--primary);display:inline-block;box-shadow: 0 0 8px var(--primary);"></span>
+        <span style="font-size:0.85rem; color:var(--primary); font-weight:600; letter-spacing:0.05em; text-transform:uppercase;">Plataforma Acadêmica Inovadora</span>
+      </div>
+      <h1 style="font-family:'DM Serif Display',serif; font-size:clamp(2.4rem,5vw,4.2rem); color:var(--text-primary); line-height:1.12; margin:0 0 1.5rem;">
+        Seus eventos acadêmicos<br/>
+        em um <em style="color:var(--primary); font-style:italic;">só lugar</em>.
+      </h1>
+      <p style="font-size:1.15rem; color:var(--text-secondary); max-width:520px; line-height:1.7; margin:0 0 2.5rem;">
+        Descubra eventos incríveis, interaja com palestrantes em tempo real e colecione certificados para construir o seu currículo.
+      </p>
+      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <a href={~p"/events"} class="btn btn-primary" style="padding: 16px 36px; font-size: 1rem;">
+          Explorar Eventos
+        </a>
+        <%= if ! @current_user do %>
+          <a href={~p"/users/register"} class="btn btn-secondary" style="padding: 16px 36px; font-size: 1rem;">
+            Criar Conta Grátis
+          </a>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%!-- ─── STATS BAR ──────────────────────────────────────────── --%>
+<section style="background:var(--bg-surface); border-bottom:1px solid var(--border-color);">
+  <div style="max-width:1280px; margin:0 auto; padding:0 2rem; display:grid; grid-template-columns:repeat(4,1fr);">
+    <div class="anim-fadeup anim-delay-1" style="padding:2.5rem 2rem; border-right:1px solid var(--border-color); text-align:center;">
+      <div style="font-family:'DM Serif Display',serif; font-size:3rem; color:var(--primary);"><%= @stats.total_events %></div>
+      <div style="font-size:0.85rem; color:var(--text-muted); margin-top:8px; font-weight: 600; text-transform:uppercase; letter-spacing:0.06em;">Eventos Totais</div>
+    </div>
+    <div class="anim-fadeup anim-delay-2" style="padding:2.5rem 2rem; border-right:1px solid var(--border-color); text-align:center;">
+      <div style="font-family:'DM Serif Display',serif; font-size:3rem; color:var(--success);"><%= @stats.total_registrations %></div>
+      <div style="font-size:0.85rem; color:var(--text-muted); margin-top:8px; font-weight: 600; text-transform:uppercase; letter-spacing:0.06em;">Inscrições</div>
+    </div>
+    <div class="anim-fadeup anim-delay-3" style="padding:2.5rem 2rem; border-right:1px solid var(--border-color); text-align:center;">
+      <div style="font-family:'DM Serif Display',serif; font-size:3rem; color:var(--text-primary);"><%= @stats.total_users %></div>
+      <div style="font-size:0.85rem; color:var(--text-muted); margin-top:8px; font-weight: 600; text-transform:uppercase; letter-spacing:0.06em;">Participantes</div>
+    </div>
+    <div class="anim-fadeup anim-delay-4" style="padding:2.5rem 2rem; text-align:center;">
+      <div style="font-family:'DM Serif Display',serif; font-size:3rem; color:var(--warning);"><%= @stats.upcoming_events %></div>
+      <div style="font-size:0.85rem; color:var(--text-muted); margin-top:8px; font-weight: 600; text-transform:uppercase; letter-spacing:0.06em;">Em Breve</div>
+    </div>
+  </div>
+</section>
+
+<%!-- ─── UPCOMING EVENTS ────────────────────────────────────── --%>
+<section style="padding:6rem 2rem; background: var(--bg-body);">
+  <div style="max-width:1280px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4rem;">
+      <h2 style="font-family:'DM Serif Display',serif; font-size:2.5rem; color: var(--text-primary); margin:0;">Próximos Eventos</h2>
+      <a href={~p"/events"} style="color:var(--primary); text-decoration:none; font-size:1rem; font-weight:600; display:flex; align-items:center; gap:5px; transition: gap 0.2s;" onmouseover="this.style.gap='8px'" onmouseout="this.style.gap='5px'">
+        Ver todos <span>→</span>
+      </a>
+    </div>
