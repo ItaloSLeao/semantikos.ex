@@ -71,3 +71,76 @@
             <circle cx="45" cy="45" r="38" fill="none" stroke="var(--gold)" stroke-width="8"
                     stroke-dasharray={"#{round((@event.max_seats - @remaining_seats)/@event.max_seats * 238.76)} 238.76"}
                     stroke-linecap="round"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <span style="font-weight:700; color:white; font-size:0.9rem;">
+              <%= round((@event.max_seats - @remaining_seats)/@event.max_seats * 100) %>%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <%!-- Tags --%>
+      <%= if @event.tags && length(@event.tags) > 0 do %>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:2rem;">
+          <%= for tag <- @event.tags do %>
+            <span style="font-size:0.78rem; padding:5px 14px; background:var(--smoke); color:var(--slate); border-radius:100px; border:1px solid #e0ddd8; font-weight:500;">
+              <%= tag %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%!-- CTA area --%>
+      <div style="border-top:1px solid var(--border-color); padding-top:1.75rem; display:flex; justify-content:flex-end; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <%= if @current_user do %>
+          <%= if @registration do %>
+            <div style="display:flex; align-items:center; gap:1rem;">
+              <span style="color:#16a34a; font-weight:600; font-size:0.9rem;">✓ Inscrito</span>
+              <%= if EventManager.Schemas.Event.can_register?(@event) do %>
+                <form action={~p"/events/#{@event.id}/register"} method="post">
+                  <input type="hidden" name="_method" value="delete">
+                  <input type="hidden" name="_csrf_token" value={get_csrf_token()}>
+                  <.button type="submit" variant={:danger}>Cancelar Inscrição</.button>
+                </form>
+              <% end %>
+            </div>
+          <% else %>
+            <%= if EventManager.Schemas.Event.can_register?(@event) do %>
+              <form action={~p"/events/#{@event.id}/register"} method="post">
+                <input type="hidden" name="_csrf_token" value={get_csrf_token()}>
+                <.button type="submit" variant={:success}>Inscrever-se</.button>
+              </form>
+            <% else %>
+              <span style="color:var(--danger); font-size:0.9rem; font-weight:500;">
+                <%= cond do
+                  @event.status != :published -> "Evento não está aberto para inscrição"
+                  !EventManager.Schemas.Event.upcoming?(@event) -> "Evento já aconteceu"
+                  !EventManager.Schemas.Event.has_available_seats?(@event) -> "Evento lotado"
+                  true -> "Inscrições encerradas"
+                end %>
+              </span>
+            <% end %>
+          <% end %>
+        <% else %>
+          <span style="color:var(--text-muted); font-size:0.9rem;">Faça login para se inscrever</span>
+          <a href={~p"/users/log_in"}
+             style="padding:10px 24px; background:var(--gold); color:#0d0f1a; border-radius:7px; text-decoration:none; font-weight:600; font-size:0.875rem;">
+            Entrar
+          </a>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%!-- Chat CTA (when registered) --%>
+  <%= if @current_user && @registration do %>
+    <div style="margin-top:1.5rem;">
+      <a href={~p"/events/#{@event.id}/chat"}
+         style="display:block; text-align:center; padding:16px; background:var(--bg-surface); color:var(--text-primary); border-radius:12px; text-decoration:none; font-weight:600; font-size:0.95rem; border:1px solid var(--border-color); transition:all 0.2s;"
+         onmouseover="this.style.background='var(--primary-glow)'; this.style.borderColor='var(--primary)';" onmouseout="this.style.background='var(--bg-surface)'; this.style.borderColor='var(--border-color)';">
+        💬 &nbsp; Entrar no Chat do Evento em Tempo Real
+      </a>
+    </div>
+  <% end %>
+</div>
