@@ -64,3 +64,70 @@ defmodule EventManager.Schemas.User do
       |> delete_change(:password)
     else
       changeset
+    end
+  end
+
+  @doc """
+  A user changeset for changing the email.
+  """
+  def email_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email])
+    |> validate_email()
+    |> case do
+      %{changes: %{email: _}} = changeset -> put_change(changeset, :confirmed_at, nil)
+      changeset -> changeset
+    end
+  end
+
+  @doc """
+  A user changeset for changing the password.
+  """
+  def password_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:password])
+    |> validate_password()
+  end
+
+  @doc """
+  A user changeset for profile updates.
+  """
+  def profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:name, :course, :department, :cpf, :birth_date, :registration_id, :avatar_path])
+    |> validate_required([:name])
+    |> validate_length(:name, max: 100)
+  end
+
+  @doc """
+  Verifies the password.
+  """
+  def valid_password?(%__MODULE__{hashed_password: hashed_password}, password)
+      when is_binary(hashed_password) and byte_size(password) > 0 do
+    Bcrypt.verify_pass(password, hashed_password)
+  end
+
+  def valid_password?(_, _) do
+    Bcrypt.no_user_verify()
+    false
+  end
+
+  @doc """
+  Changeset for confirming a user.
+  """
+  def confirm_changeset(user) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    change(user, confirmed_at: now)
+  end
+
+  @doc "Checks if user is admin"
+  def admin?(%__MODULE__{role: :admin}), do: true
+  def admin?(_), do: false
+
+  @doc "Checks if user is speaker"
+  def speaker?(%__MODULE__{role: :speaker}), do: true
+  def speaker?(_), do: false
+
+  @doc "Returns all available roles"
+  def roles, do: @roles
+end
