@@ -53,3 +53,59 @@ defmodule EventManagerWeb.Router do
       live "/events/:id/chat", EventChatLive
       live "/events/:id/dashboard", EventDashboardLive
     end
+  end
+
+  scope "/speaker", EventManagerWeb do
+    pipe_through [:browser, :require_authenticated_user, :require_speaker]
+
+    get "/events", EventController, :speaker_events
+    get "/events/:id/attendees", EventController, :speaker_attendees
+    post "/events/:event_id/attendance", EventController, :mark_attendance
+    post "/events/:event_id/certificates", EventController, :generate_certificates
+  end
+
+  scope "/admin", EventManagerWeb do
+    pipe_through [:browser, :require_authenticated_user, :require_admin]
+
+    get "/", AdminController, :reports
+    get "/events", AdminController, :events
+    get "/events/new", AdminController, :new_event
+    post "/events", AdminController, :create_event
+    get "/events/:id/edit", AdminController, :edit_event
+    put "/events/:id", AdminController, :update_event
+    delete "/events/:id", AdminController, :delete_event
+    post "/events/:id/publish", AdminController, :publish_event
+    post "/events/:id/cancel", AdminController, :cancel_event
+
+    get "/users", AdminController, :users
+    get "/users/new", AdminController, :new_user
+    post "/users", AdminController, :create_user
+    get "/users/:id/edit", AdminController, :edit_user
+    put "/users/:id", AdminController, :update_user
+    delete "/users/:id", AdminController, :delete_user
+
+    get "/reports/occupancy", AdminController, :occupancy_report
+    get "/reports/participation", AdminController, :participation_report
+    get "/reports/export/csv", AdminController, :export_csv
+
+    get "/certificates", AdminController, :certificates
+    post "/certificates/generate/:event_id", AdminController, :generate_certificates
+
+    live_session :admin_user, on_mount: [{EventManagerWeb.UserAuth, :ensure_authenticated}] do
+      live "/dashboard", AdminDashboardLive
+    end
+  end
+
+  scope "/", EventManagerWeb do
+    pipe_through :browser
+    get "/users/log_out", AuthController, :delete_session
+    delete "/users/log_out", AuthController, :delete_session
+  end
+
+  scope "/api", EventManagerWeb do
+    pipe_through :api
+    get "/events", Api.EventController, :index
+    get "/events/:id", Api.EventController, :show
+    get "/events/:id/stats", Api.EventController, :stats
+  end
+end
