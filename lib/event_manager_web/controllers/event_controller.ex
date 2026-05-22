@@ -51,3 +51,56 @@ defmodule EventManagerWeb.EventController do
     case EventManager.Core.cancel_registration(event_id_int, user.id) do
       {:ok, :cancelled} ->
         conn |> put_flash(:info, "Inscrição cancelada com sucesso.") |> redirect(to: ~p"/events/#{event_id}")
+      {:error, :not_found} ->
+        conn |> put_flash(:error, "Inscrição não encontrada.") |> redirect(to: ~p"/events/#{event_id}")
+    end
+  end
+
+  # --- User Registrations (requires auth) ---
+  def my_registrations(conn, _params) do
+    user = conn.assigns.current_user
+    registrations = EventManager.Core.list_user_registrations(user.id)
+    render(conn, "registrations_index.html", registrations: registrations)
+  end
+
+  # --- Speaker Operations ---
+  def speaker_events(conn, _params) do
+    user = conn.assigns.current_user
+    events = EventManager.Core.list_events(speaker_id: user.id)
+    render(conn, "speaker_events.html", events: events)
+  end
+
+  def speaker_attendees(conn, %{"id" => event_id}) do
+    event = EventManager.Core.get_event_with_registrations!(event_id)
+    user = conn.assigns.current_user
+
+    if user.role == :admin or event.speaker_id == user.id do
+      render(conn, "speaker_attendees.html", event: event)
+    else
+      conn |> put_flash(:error, "Sem permissão.") |> redirect(to: ~p"/")
+    end
+  end
+
+  def mark_attendance(conn, %{"event_id" => event_id, "registration_id" => registration_id, "attended" => attended}) do
+    case EventManager.Core.mark_attendance(registration_id, attended == "true") do
+      {:ok, _} ->
+        conn |> put_flash(:info, "Presença atualizada com sucesso.") |> redirect(to: ~p"/speaker/events/#{event_id}/attendees")
+      {:error, _} ->
+        conn |> put_flash(:error, "Erro ao atualizar presença.") |> redirect(to: ~p"/speaker/events/#{event_id}/attendees")
+    end
+  end
+
+  def generate_certificates(conn, %{"event_id" => event_id}) do
+    event = EventManager.Core.get_event!(event_id)
+    user = conn.assigns.current_user
+
+    if user.role == :admin or event.speaker_id == user.id do
+      count = EventManager.Services.generate_event_certificates(event_id)
+      conn 
+      |> put_flash(:info, "#{count} certificados gerados com sucesso.") 
+      |> redirect(to: ~p"/speaker/events/#{event_id}/attendees")
+    else
+      conn |> put_flash(:error, "Sem permissão.") |> redirect(to: ~p"/")
+    end
+  end
+end
