@@ -49,3 +49,54 @@ defmodule EventManagerWeb.Telemetry do
       ),
       summary("event_manager.repo.query.query_time",
         unit: {:native, :millisecond},
+        description: "Database query execution time"
+      ),
+      summary("event_manager.repo.query.queue_time",
+        unit: {:native, :millisecond},
+        description: "Database query queue time"
+      ),
+      summary("event_manager.repo.query.idle_time",
+        unit: {:native, :millisecond},
+        description: "Database query idle time"
+      ),
+
+      # VM Metrics
+      last_value("vm.memory.total", unit: {:byte, :kilobyte}),
+      last_value("vm.memory.processes", unit: {:byte, :kilobyte}),
+      last_value("vm.memory.system", unit: {:byte, :kilobyte}),
+      last_value("vm.total_run_queue_lengths.total"),
+      last_value("vm.total_run_queue_lengths.cpu"),
+      last_value("vm.total_run_queue_lengths.io"),
+
+      # Custom Business Metrics
+      counter("event_manager.events.created", tags: [:status]),
+      counter("event_manager.registrations.created"),
+      counter("event_manager.certificates.generated"),
+      summary("event_manager.chat.messages.count")
+    ]
+  end
+
+  defp periodic_measurements do
+    [
+      {__MODULE__, :process_count, []},
+      {__MODULE__, :event_stats, []}
+    ]
+  end
+
+  def process_count do
+    :telemetry.execute([:vm, :processes], %{count: Process.list() |> length()})
+  end
+
+  def event_stats do
+    events = EventManager.Core.list_events()
+    registrations = length(events) > 0 && events |> Enum.map(&(&1.registrations |> length)) |> Enum.sum() || 0
+
+    :telemetry.execute(
+      [:event_manager, :stats],
+      %{
+        events_count: length(events),
+        registrations_count: registrations
+      }
+    )
+  end
+end
