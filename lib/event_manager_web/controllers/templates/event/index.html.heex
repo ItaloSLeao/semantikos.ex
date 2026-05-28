@@ -41,3 +41,47 @@
                 <%= Calendar.strftime(event.date, "%d/%m/%Y %H:%M") %>
               </span>
               <span style="display:flex; align-items:center; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <%= event.location %>
+              </span>
+              <%= if event.speaker do %>
+                <span style="display:flex; align-items:center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  <%= event.speaker.name %>
+                </span>
+              <% end %>
+            </div>
+
+            <%!-- Seat progress bar --%>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px; font-weight: 500;">
+                <span>Vagas disponíveis</span>
+                <span><strong style="color:var(--text-primary);"><%= EventManager.Schemas.Event.remaining_seats(event) %></strong> / <%= event.max_seats %></span>
+              </div>
+              <div style="height:6px; background:var(--bg-body); border-radius:99px; overflow:hidden;">
+                <div style={"width:#{round((1 - EventManager.Schemas.Event.remaining_seats(event)/event.max_seats)*100)}%; height:100%; background:linear-gradient(90deg,var(--primary),var(--primary-hover)); border-radius:99px; transition:width 0.5s;"}></div>
+              </div>
+            </div>
+
+            <%!-- Tags --%>
+            <%= if event.tags && length(event.tags) > 0 do %>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:1.5rem;">
+                <%= for tag <- event.tags do %>
+                  <span style="font-size:0.75rem; padding:4px 12px; background:var(--bg-body); color:var(--text-secondary); border-radius:100px; border:1px solid var(--border-color); font-weight:600;">
+                    <%= tag %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <div style="padding:1.5rem 2rem; border-top:1px solid var(--border-color); background:var(--bg-surface-hover);">
+            <a href={~p"/events/#{event.id}"} class="btn btn-primary" style="width:100%;">
+              Ver detalhes →
+            </a>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+</div>
