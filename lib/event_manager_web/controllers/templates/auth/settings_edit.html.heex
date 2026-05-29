@@ -39,3 +39,45 @@
                 img.src = e.target.result;
                 img.style.display = 'block';
                 if(placeholder) placeholder.style.display = 'none';
+              }
+              reader.readAsDataURL(input.files[0]);
+            }
+          }
+        </script>
+      </div>
+
+      <%!-- Coluna Direita: Formulário de Dados --%>
+      <div class="surface" style="padding: 2.5rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0 0 1.5rem;">Dados Pessoais</h3>
+        
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <.input name="user[name]" id="user_name" type="text" label="Nome Completo" value={@user.name} required />
+            <.input name="user[cpf]" id="user_cpf" type="text" label="CPF" placeholder="000.000.000-00" value={@user.cpf} />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <.input name="user[birth_date]" id="user_birth_date" type="date" label="Data de Nascimento" value={@user.birth_date} />
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <label style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:0.95rem; font-weight:500; color:var(--text-primary);">E-mail</label>
+              <input type="email" value={@user.email} disabled class="input-field" style="color:var(--text-muted) !important; cursor: not-allowed; background-color:var(--bg-body) !important;" />
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0 0 1.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">Vínculo Acadêmico</h3>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <.input name="user[course]" id="user_course" type="text" label="Curso" value={@user.course} />
+            <.input name="user[department]" id="user_department" type="text" label="Departamento" value={@user.department} />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+              <.input name="user[registration_id]" id="user_registration_id" type="text" label="Matrícula" placeholder="Ex: 202610123" value={@user.registration_id} />
+          </div>
+          
+          <div style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <button type="submit" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 10px 24px; background: var(--text-primary); color: var(--bg-body); border: none; border-radius: 99px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Atualizar Perfil</button>
+          </div>
+      </div>
+    </div>
+  </.form>
+</div>
