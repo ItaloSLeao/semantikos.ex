@@ -38,3 +38,43 @@ defmodule EventManager.Fixtures do
 
   def speaker_fixture(attrs \\ %{}) do
     {:ok, user} =
+      attrs
+      |> Map.put(:role, :speaker)
+      |> valid_user_attributes()
+      |> EventManager.Core.register_user()
+
+    user
+  end
+
+  def valid_event_attributes(attrs \\ %{}) do
+    Enum.into(attrs, %{
+      title: "Test Event #{System.unique_integer()}",
+      description: "Test event description",
+      date: DateTime.utc_now() |> DateTime.add(7 * 24 * 60 * 60, :second),
+      duration_minutes: 60,
+      location: "Test Location",
+      max_seats: 50,
+      status: :published
+    })
+  end
+
+  def event_fixture(attrs \\ %{}) do
+    speaker = speaker_fixture()
+
+    {:ok, event} =
+      attrs
+      |> valid_event_attributes()
+      |> Map.put(:speaker_id, speaker.id)
+      |> EventManager.Core.create_event()
+
+    event
+  end
+
+  def registration_fixture(user \\ nil, event \\ nil) do
+    user = user || user_fixture()
+    event = event || event_fixture()
+
+    {:ok, registration} = EventManager.Core.register_for_event(event.id, user.id)
+    registration
+  end
+end
