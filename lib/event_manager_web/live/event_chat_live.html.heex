@@ -37,3 +37,42 @@
               <div style="font-size:0.7rem; text-transform:uppercase; font-weight:700; color:var(--primary); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
                 <span>Pergunta</span>
                 <%= if msg.is_answered do %>
+                  <span style="color:var(--success);">✓ Respondida</span>
+                <% end %>
+              </div>
+            <% end %>
+            
+            <%= msg.message %>
+          </div>
+
+          <%= if msg.is_question and !msg.is_answered and @current_user.role in [:admin, :speaker] do %>
+            <button phx-click="mark_answered" phx-value-message_id={msg.id}
+                    style="margin-top:6px; font-size:0.75rem; color:var(--success); background:none; border:none; cursor:pointer; font-weight:600;">
+              ✓ Marcar como Respondida
+            </button>
+          <% end %>
+
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Input Area -->
+    <div style="padding:1.5rem; border-top:1px solid var(--border-color); background:var(--bg-body); border-radius:0 0 16px 16px;">
+      <form id="chat-form" phx-submit="send_message" style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="chat-input" name="message" value={@message_input} placeholder="Digite sua mensagem..." autocomplete="off" class="input-field" required />
+          
+          <button type="submit" phx-disable-with="Enviando..." class="btn btn-primary">
+            Enviar
+          </button>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
+          <input type="checkbox" id="chat-is-question" name="is_question" value="true" checked={@is_question} style="accent-color:var(--primary);" />
+          Marcar como Pergunta (Destaque)
+        </label>
+      </form>
+    </div>
+
+  </div>
+</div>
