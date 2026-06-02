@@ -34,3 +34,40 @@
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
     <div style="background:white; border:1px solid #eae9e4; border-radius:12px; overflow:hidden;">
       <div style="padding:1.5rem; border-bottom:1px solid #eae9e4; background:var(--smoke);">
+        <h2 style="font-family:'DM Serif Display',serif; font-size:1.4rem; margin:0;">Top Eventos (Ocupação)</h2>
+      </div>
+      <table style="width:100%; border-collapse:collapse;">
+        <tbody>
+          <%= for event <- @stats.occupancy do %>
+            <tr style="border-bottom:1px solid #f5f4f0;">
+              <td style="padding:16px; font-size:0.9rem; font-weight:500; color:var(--ink);"><%= event.title %></td>
+              <td style="padding:16px; text-align:right; font-size:0.9rem; color:var(--slate);">
+                <span style="color:var(--gold); font-weight:600;"><%= event.occupancy_rate %>%</span> 
+                (<%= event.registrations %>/<%= event.max_seats %>)
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background:white; border:1px solid #eae9e4; border-radius:12px; overflow:hidden;">
+      <div style="padding:1.5rem; border-bottom:1px solid #eae9e4; background:var(--smoke);">
+        <h2 style="font-family:'DM Serif Display',serif; font-size:1.4rem; margin:0;">Participação por Curso</h2>
+      </div>
+      <table style="width:100%; border-collapse:collapse;">
+        <tbody>
+          <%= for course <- @stats.participation do %>
+            <tr style="border-bottom:1px solid #f5f4f0;">
+              <td style="padding:16px; font-size:0.9rem; font-weight:500; color:var(--ink);"><%= course.course %></td>
+              <td style="padding:16px; text-align:right; font-size:0.9rem; color:var(--slate);">
+                <span style="font-weight:600;"><%= course.total_registrations %></span> inscritos
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
