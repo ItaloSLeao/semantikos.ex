@@ -1,0 +1,36 @@
+<div style="max-width:1280px; margin:0 auto; padding:4rem 2rem;" class="anim-fadein">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem;">
+    <div>
+      <div style="margin-bottom: 1rem;">
+        <a href={~p"/admin/events"} style="display:inline-flex; align-items:center; gap:6px; color:var(--text-secondary); text-decoration:none; font-size:0.85rem; font-weight:600; background:var(--bg-surface-hover); padding:6px 16px; border-radius:9999px; border:1px solid var(--border-color); transition:all 0.2s;">&larr; Voltar aos Eventos</a>
+      </div>
+      <h1 style="font-family:'DM Serif Display',serif; font-size:2.5rem; color:var(--text-primary); margin:0;">Turma: <%= @event.title %></h1>
+    </div>
+    
+    <div>
+      <.link href={~p"/speaker/events/#{@event.id}/certificates"} method="post"
+             class="btn btn-primary"
+             data-confirm="Gerar certificados para todos os alunos que tiveram presença confirmada?">
+        Gerar Certificados
+      </.link>
+    </div>
+  </div>
+
+  <div class="surface" style="overflow:hidden; border-radius:12px;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--bg-surface-hover); border-bottom:1px solid var(--border-color);">
+          <th style="padding:16px 24px; text-align:left; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); font-weight:700;">Nome do Aluno</th>
+          <th style="padding:16px 24px; text-align:left; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); font-weight:700;">E-mail</th>
+          <th style="padding:16px 24px; text-align:left; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); font-weight:700;">Status Inscrição</th>
+          <th style="padding:16px 24px; text-align:center; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); font-weight:700;">Presença</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= if Enum.empty?(@event.registrations) do %>
+          <tr>
+            <td colspan="4" style="padding:3rem; text-align:center; color:var(--text-muted);">Nenhum participante inscrito ainda.</td>
+          </tr>
+        <% else %>
+          <%= for reg <- @event.registrations do %>
