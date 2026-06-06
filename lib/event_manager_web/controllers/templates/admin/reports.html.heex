@@ -1,0 +1,32 @@
+<div style="max-width:1280px; margin:0 auto; padding:3rem 2rem;" class="anim-fadein">
+
+  <div style="margin-bottom:2.5rem;">
+    <p style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); font-weight:600; margin:0 0 0.4rem;">Admin</p>
+    <h1 style="font-family:'DM Serif Display',serif; font-size:2rem; margin:0;">Relatórios & Analytics</h1>
+  </div>
+
+  <%!-- Stats grid --%>
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:2.5rem;">
+    <div class="anim-fadeup anim-delay-1" style="background:var(--ink); border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(212,165,71,0.15);"></div>
+      <dt style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); font-weight:500; margin:0 0 0.75rem;">Total de Eventos</dt>
+      <dd style="font-family:'DM Serif Display',serif; font-size:2.5rem; color:var(--gold); margin:0; line-height:1;"><%= @stats.total_events %></dd>
+    </div>
+    <div class="anim-fadeup anim-delay-2" style="background:var(--ink); border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(78,201,176,0.1);"></div>
+      <dt style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); font-weight:500; margin:0 0 0.75rem;">Total de Usuários</dt>
+      <dd style="font-family:'DM Serif Display',serif; font-size:2.5rem; color:var(--cyan); margin:0; line-height:1;"><%= @stats.total_users %></dd>
+    </div>
+    <div class="anim-fadeup anim-delay-3" style="background:var(--ink); border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.04);"></div>
+      <dt style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); font-weight:500; margin:0 0 0.75rem;">Inscrições</dt>
+      <dd style="font-family:'DM Serif Display',serif; font-size:2.5rem; color:white; margin:0; line-height:1;"><%= @stats.total_registrations %></dd>
+    </div>
+    <div class="anim-fadeup anim-delay-4" style="background:var(--ink); border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(212,165,71,0.08);"></div>
+      <dt style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); font-weight:500; margin:0 0 0.75rem;">Eventos em Breve</dt>
+      <dd style="font-family:'DM Serif Display',serif; font-size:2.5rem; color:var(--gold-pale); margin:0; line-height:1;"><%= @stats.upcoming_events %></dd>
+    </div>
+  </div>
+
+  <%!-- Action cards --%>
