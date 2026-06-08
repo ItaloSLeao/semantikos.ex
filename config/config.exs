@@ -26,3 +26,31 @@ config :logger, :console,
 # Configure Phoenix connections
 config :phoenix, :json_library, Jason
 
+# Configures bcrypt for password hashing
+config :bcrypt_elixir, log_rounds: 12
+
+# PDF Generator configuration
+config :pdf_generator, safe_relative_path: System.tmp_dir!()
+config :pdf_generator, raise_on_missing_wkhtmltopdf_binary: false
+
+# Import environment specific config
+import_config "#{config_env()}.exs"
+
+config :esbuild,
+  version: "0.25.0",
+  default: [
+    args:
+      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+config :tailwind,
+  version: "4.1.12",
+  default: [
+    args: ~w(
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../assets", __DIR__)
+  ]
