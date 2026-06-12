@@ -26,3 +26,31 @@ defmodule EventManagerWeb.Endpoint do
     store: :cookie,
     key: "_event_manager_key",
     signing_salt: "SigningSalt123",
+    same_site: "Lax"
+  ]
+
+  # WebSocket for real-time features (LiveView and Channels)
+  socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
+  socket "/socket", EventManagerWeb.UserSocket, websocket: true, longpoll: false
+
+  # Session handling
+  plug Plug.Session, @session_options
+
+  # Request pipeline
+  plug Plug.RequestId
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+
+  plug Plug.Parsers,
+    parsers: [:urlencoded, :multipart, :json],
+    pass: ["*/*"],
+    json_decoder: Phoenix.json_library()
+
+  plug Plug.MethodOverride
+  plug Plug.Head
+
+  # Security headers
+  plug Plug.SSL, rewrite_on: [:x_forwarded_proto]
+
+  # Router
+  plug EventManagerWeb.Router
+end
