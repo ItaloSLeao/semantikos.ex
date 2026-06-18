@@ -1,0 +1,22 @@
+<div style="max-width:1280px; margin:0 auto; padding:4rem 2rem;" class="anim-fadein">
+  <%!-- Header and Verification Tool --%>
+  <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border-color);">
+    <div>
+      <p style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--primary); font-weight:700; margin:0 0 0.4rem;">Conquistas</p>
+      <h1 style="font-family:'DM Serif Display',serif; font-size:3rem; color: var(--text-primary); margin:0;">Meus Certificados</h1>
+    </div>
+    
+    <div class="surface" style="padding: 2rem; flex: 1; max-width: 500px;">
+      <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0 0 0.5rem; color: var(--text-primary);">Autenticidade</h3>
+      <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0 0 1.25rem;">Verifique a validade de um documento emitido.</p>
+      <.form for={%{}} as={:search} action={~p"/certificates/verify"} method="get" style="display: flex; gap: 0.5rem;">
+        <input type="text" name="certificate_number" placeholder="CERT-123-456" required class="input-field" style="flex: 1;" />
+        <button type="submit" class="btn btn-primary">Validar</button>
+      </.form>
+    </div>
+  </div>
+
+  <%!-- Certificates Grid --%>
+  <%= if length(@certificates) == 0 do %>
+    <div class="surface" style="padding:5rem; text-align:center; color:var(--text-muted);">
+      <div style="font-size:3.5rem; margin-bottom:1rem;">📭</div>
