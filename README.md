@@ -26,7 +26,6 @@ Este sistema permite a gestão completa de eventos acadêmicos, incluindo:
 ![](img/03.png)
 ![](img/04.png)
 ![](img/05.png)
-![](img/06.png)
 ![](img/07.png)
 ![](img/08.png)
 ![](img/09.png)
